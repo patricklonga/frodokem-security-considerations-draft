@@ -368,10 +368,11 @@ government agencies, which have expressed a desire for a conservative
 option with less underlying algebraic structure. FrodoKEM has been
 recommended as a conservative alternative by the German BSI [BSI],
 the French ANSSI [ANSII], and the Dutch NLNCSA and AIVD [].
-This support motivated the standardization of FrodoKEM by ISO [].
-The standard document, which is expected to be published soon, would
-be the first ISO standard for post-quantum cryptography (the standard
-will include ML-KEM, FrodoKEM and Classic McEliece). 
+This support motivated the standardization of FrodoKEM by ISO
+[ISO18033-2-AMD2]. The standard document, which is expected to be
+published soon, would be the first ISO standard for post-quantum
+cryptographic schemes (the standard will include ML-KEM, FrodoKEM
+and Classic McEliece). 
 
 ## Protocol-Relevant Considerations
 
@@ -394,55 +395,44 @@ regenerated coins, compare the reconstructed values to the received
 ones, and apply the fallback secret if the check fails. This logic
 is central to FrodoKEM’s CCA-style security.
 
-The byte encoding rules, the separate packing-function byte encoding,
-the matrix encoding and decoding rules, and the `Pack` / `Unpack`
-procedures are explicitly specified in the current IETF draft and in ISO
-Clause 14. Implementations MUST follow those rules exactly.
+The byte encoding rules, the separate packing/unpacking byte encoding,
+and the matrix encoding and decoding rules are explicitly specified in
+the current FrodoKEM Internet-Draft [I-D.FrodoKEM]. Implementations
+must follow those rules exactly.
 
-Implementations MUST validate the exact lengths of public keys, secret
-keys, and ciphertexts for the selected parameter set before any further
-processing. The current IETF and ISO texts present fixed formats and do
+Implementations must validate the exact lengths of public keys, secret
+keys and ciphertexts for the selected parameter set before any further
+processing. The FrodoKEM Internet-Draft present fixed formats and do
 not describe flexible wire encodings for these values.
 
+It is safe to reuse (standard) FrodoKEM public keys for multiple
+encapsulations, and doing so produces independent shared secrets for
+each ciphertext. However, this does not provide perfect forward
+secrecy: if the private key is later compromised, past sessions can
+be recovered. Therefore, when a protocol already transmits an
+unauthenticated public key (e.g., as part of a handshake), it is
+recommended to generate a fresh keypair per session and immediately
+delete the private key after decapsulation, which provides perfect
+forward secrecy.
+
+## Implementation security
+
+> Patrick: say something about simplicity and ease of implementation,
+> and side-channel security. 
+> Emphasize need for constant-time implementation for sampling from
+> the error distribution, for the decapsulation check, etc.
+>
+> 
 
 
-The consulted FrodoKEM texts explicitly emphasize constant-time
-implementation for sampling from the error distribution. The current IETF
-draft says that it is important to perform the sampling in constant time
-to avoid exposing timing side channels, including the complete traversal
-of the sampling table and constant-time comparison behavior. ISO Clause
-14 similarly directs implementers to relevant implementation guidance.
+## Public implementations
 
+> Patrick: mention the portable and efficient implementations in C,
+> the readable reference implementations in Python, and the functional
+> tests and known-answer tests. 
+>
+> 
 
-## Key Lifecycle, Reuse, and Zeroization
-
-FrodoKEM itself does not provide forward secrecy. It is a KEM that
-derives a shared secret from a public key and ciphertext. Protocols that
-require forward secrecy MUST obtain it from the larger protocol design,
-for example through the use of appropriately refreshed credentials or
-through other key-establishment contributions in the overall protocol
-construction. This is deployment guidance that follows from FrodoKEM’s
-role as a KEM rather than from any separate explicit PFS claim in the
-consulted FrodoKEM sources.
-
-## Interoperability, Test Vectors, and Negative Tests
-
-The consulted FrodoKEM sources provide multiple public implementation and
-test artifacts. The 2021 specification contains known-answer materials
-and supporting documentation; ISO Annex C.11 states that numerical
-examples for all parameter sets of FrodoKEM and eFrodoKEM are in
-Reference [53]; and ISO Annex E.2 states that Reference [53] provides
-portable and efficient implementations in C, readable reference
-implementations in Python, as well as functional tests and known-answer
-tests. [3](https://frodokem.org/files/FrodoKEM-specification-20210604.pdf)[2](https://microsoft-my.sharepoint.com/personal/plonga_microsoft_com/Documents/Microsoft%20Copilot%20Chat%20Files/C086890e.pdf)
-
-
-The consulted sources explicitly identify test vectors, reference C
-code, and Python reference code, but I did not find a directly cited
-multi-implementation interoperability report in those specific source
-snippets. Accordingly, this document points implementers to the cited
-vector and reference-code sources and does not claim broader interop
-evidence here. [2](https://microsoft-my.sharepoint.com/personal/plonga_microsoft_com/Documents/Microsoft%20Copilot%20Chat%20Files/C086890e.pdf)[3](https://frodokem.org/files/FrodoKEM-specification-20210604.pdf)
 
 # IANA Considerations
 
