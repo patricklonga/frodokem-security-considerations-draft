@@ -160,10 +160,28 @@ informative:
     - name: D. Stebila
     date: 2025
     target: https://eprint.iacr.org/2025/343
+  BSI24:
+    title: Cryptographic Mechanisms: Recommendations and Key Lengths, BSI TR-02102-1, Version: 2024-1
+    author:
+    - name: Federal Office for Information Security (BSI)
+    date: 2024-01
+    target: https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-1.pdf?__blob=publicationFile&v=7
+  ANSSI23:
+    title: ANSSI views on the Post-Quantum Cryptography transition (2023 follow up)
+    author:
+    - name: National Cybersecurity Agency of France (ANSSI)
+    date: 2023
+    target: https://cyber.gouv.fr/en/publications/follow-position-paper-post-quantum-cryptography
+  AIVD24:
+    title:  The PQC Migration Handbook: Guidelines for Migrating to Post-Quantum Cryptography (second edition)
+    author:
+    - name: General Intelligence and Security Service (AIVD) and Centrum Wiskunde & Informatica (CWI) and Netherlands Organization for Applied Scientific Research (TNO)
+    date: 2024
+    target: https://publications.tno.nl/publication/34643386/fXcPVHsX/TNO-2024-pqc-en.pdf
   NIST-3rd-round:
     title: Status Report on the Third Round of the NIST Post-Quantum Cryptography Standardization Process
     author:
-    - name: NIST
+    - name: National Institute of Standards and Technology (NIST)
     date: 2022-07
     target: https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8413-upd1.pdf
 
@@ -429,8 +447,8 @@ design choices are laudable".
 FrodoKEM's conservative design has gained the support of multiple
 government agencies, which have emphasized the need for a conservative
 option with less underlying algebraic structure. FrodoKEM has been
-recommended as a conservative alternative by the German BSI [BSI],
-the French ANSSI [ANSSI], and the Dutch NLNCSA and AIVD [NLNCSA, AIVD].
+recommended as a conservative alternative by the German BSI [BSI24],
+the French ANSSI [ANSSI23], and the Dutch NLNCSA and AIVD [AIVD24].
 This support ultimately led to the standardization of FrodoKEM by ISO
 [ISO18033-2-AMD2]. 
 
