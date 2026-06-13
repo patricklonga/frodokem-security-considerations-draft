@@ -46,7 +46,7 @@ normative:
     date: 2026-03
     target: https://datatracker.ietf.org/doc/draft-longa-cfrg-frodokem/
   ISO18033-2-AMD2:
-    title: ISO/IEC 18033-2:2006/Amd 2, Information technology — Security techniques — Encryption algorithms — Part 2: Asymmetric ciphers, Amendment 2 (under development)
+    title: ISO/IEC 18033-2:2006/Amd 2, Information technology — Security techniques — Encryption algorithms — Part 2: Asymmetric ciphers, Amendment 2
     author:
     - name: ISO
     date: 2026-06
@@ -104,11 +104,73 @@ informative:
     - name: D. Shiu
     date: 2026-05
     target: https://github.com/sfluhrer/ml-kem-security-considerations
+  ACD+18:
+    title: Estimate all the LWE, NTRU schemes!
+    author:
+    - name: M. R. Albrecht
+    - name: B. R. Curtis
+    - name: A. Deo
+    - name: A. Davidson
+    - name: R. Player
+    - name: E. W. Postlethwaite
+    - name: F. Virdia
+    - name: T. Wunderer
+    date: 2018
+    target: https://eprint.iacr.org/2018/331
+  ADH+19:
+    title: The General Sieve Kernel and New Records in Lattice Reduction
+    author:
+    - name: M. R. Albrecht
+    - name: L. Ducas
+    - name: G. Herold
+    - name: E. Kirshanova
+    - name: E. W. Postlethwaite
+    - name: M. Stevens
+    date: 2019
+    target: https://eprint.iacr.org/2019/089
+  AGP+20:
+    title: Estimating quantum speedups for lattice sieves
+    author:
+    - name: M. R. Albrecht
+    - name: V. Gheorghiu
+    - name: E. W. Postlethwaite
+    - name: J. M. Schanck
+    date: 2020
+    target: https://eprint.iacr.org/2019/1161
+  DDG+20:
+    title: LWE with side information: Attacks and concrete security estimation
+    author:
+    - name: D. Dachman-Soled
+    - name: L. Ducas 
+    - name: H. Gong 
+    - name: M. Rossi
+    date: 2020
+    target: https://eprint.iacr.org/2020/292
+  Gla24:
+    title:  Tight multi-target security for key encapsulation mechanisms
+    author:
+    - name: L. Glabush
+    date: 2024
+    target: https://uwspace.uwaterloo.ca/items/8871c4b1-c2c6-4a42-9485-1466f1772985
+  GHS25:
+    title:  Tight multi-target security for key encapsulation mechanisms
+    author:
+    - name: L. Glabush
+    - name: K. Hövelmanns
+    - name: D. Stebila
+    date: 2025
+    target: https://eprint.iacr.org/2025/343
+  NIST-3rd-round:
+    title: Status Report on the Third Round of the NIST Post-Quantum Cryptography Standardization Process
+    author:
+    - name: NIST
+    date: 2022-07
+    target: https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8413-upd1.pdf
 
 ---
 
 --- abstract
-  ISO is finalizing the process to standardize FrodoKEM. This document gives
+  ISO standardized FrodoKEM in June 2026 [ISO18033-2-AMD2]. This document gives
   security guidance for FrodoKEM for use in protocols. It explains what security
   claims protocol designers may rely on, what assumptions and conditions are
   required, what parameter sets are in scope, and what implementers need to do
@@ -191,12 +253,12 @@ encapsulation, and decapsulation.
 In this first step, Alice generates a public and private keypair. The procedure
 is described in Section 7.1 of [I-D.FrodoKEM].
 
-The algorithm internally calls the random number generator to produce seeds s,
-seedSE and z (s is used as a fallback random secret, seedSE is used to sample
+The algorithm internally calls the random number generator (RNG) to produce seeds
+s, seedSE and z (s is used as a fallback random secret, seedSE is used to sample
 error/secret matrices and z is used to generate the so-called public matrix A).
 These seeds can be securely stored to allow the reconstruction of the fully
 expanded key format. Intermediate data other than the matrix A must be securely
-deleted. When there is enough storage, matrix A may be saved for repeated
+deleted. When there is enough storage capacity, matrix A may be saved for repeated
 decapsulation operations with the same private key.
 
 ## Encapsulation
@@ -204,14 +266,14 @@ decapsulation operations with the same private key.
 In the second step, Bob generates a ciphertext and a shared secret. The procedure
 is described in Section 7.2 of [I-D.FrodoKEM].
 
-The algorithm internally calls the random number generator (RNG) to produce a
-random message value u and a random public salt, which are then used to generate
-a ciphertext and a shared secret. Since the salt value is released as part of the
-ciphertext, implementors may want to take some precautions to avoid releasing
-the RNG output directly. Intermediate data other than data corresponding to the
-ciphertext or public key (including matrix A) must be securely deleted. When there
-is enough storage, matrix A may be saved for repeated encapsulation operations
-with the same public key.
+The algorithm internally calls the RNG to produce a random message value u and a
+random public salt, which are then used to generate a ciphertext and a shared
+secret. Since the salt value is released as part of the ciphertext, implementors
+may want to take some precautions to avoid releasing the RNG output directly.
+Intermediate data other than data corresponding to the ciphertext or public key
+(including matrix A) must be securely deleted. When there is enough storage
+capacity, matrix A may be saved for repeated encapsulation operations with the
+same public key.
 
 The ciphertext can be sent back to Alice; if the protocol is successful, the
 shared secret will be the key shared with Alice.
@@ -235,7 +297,7 @@ be the same.
 
 # Parameter Sets
 
-FrodoKEM includes six parameter sets:
+Standard FrodoKEM includes six parameter sets:
 
 1. FrodoKEM-640-⟨PRG⟩, which matches or exceeds the brute-force security of AES128.
 
@@ -310,8 +372,8 @@ A short decision guide is therefore:
 For protocol designers and implementors, the authoritative FrodoKEM
 specification is detailed in the FrodoKEM Internet-Draft [I-D.FrodoKEM].
 As of version draft-longa-cfrg-frodokem-02, the I-D is fully compatible
-with the upcoming ISO standard [ISO18033-2-AMD2], with the sole exception
-that the FrodoKEM-640 parameter set is **not** included in [ISO18033-2-AMD2]. 
+with the ISO standard [ISO18033-2-AMD2], with the sole exception that
+the FrodoKEM-640 parameter set is **not** included in [ISO18033-2-AMD2]. 
 
 Both documents are in turn derived from FrodoKEM's Round 3 specification
 [FrodoSpec2021] and the 2023 annex that provides the algorithm specification
@@ -341,8 +403,8 @@ As is customary in cryptography, security strength is better quantified
 by an analysis of the best-known cryptanalytic attacks against a given
 cryptographic scheme. An up-to-date cryptanalysis of FrodKEM LWE
 instances was carried out in [FrodoPaper2025]. The results for the
-'beyond-core-SVP' methodology showed estimates of 149.8 bits for
-(e)FrodoKEM-640, 212.6 bits for (e)FrodoKEM-976 and 266.8 bits for
+'beyond-core-SVP' methodology showed security estimates of 149.8 bits
+for (e)FrodoKEM-640, 212.6 bits for (e)FrodoKEM-976 and 266.8 bits for
 (e)FrodoKEM-1344, which support the security level claims for the
 FrodoKEM parameter sets.
 
@@ -350,29 +412,27 @@ FrodoKEM parameter sets.
 
 The LWE problem, which underlies the security of FrodoKEM, has been
 extensively studied for about two decades. Examples of cryptanalysis
-papers include [], [], [], [], to name a few.
+papers include [ACD+18], [ADH+19], [AGP+20], [DDG+20], to name a few.
 
 FrodoKEM has a substantial public record that dates back to the start
 of NIST's Post-Quantum Cryptography Standardization process in 2017.
 In addition to the security analysis presented as part of the the NIST
-submission, FrodoKEM' security has been studied in [], [] and []. 
+submission, FrodoKEM' security has been studied in [Gla24], [GHS25]
+and [FrodoPaper2025]. 
 
 FrodoKEM was selected as a third-round alternate candidate, and
 ultimately was not selected by NIST due to performance reasons, as
-explained in Section 4.3.1 of []. In that same report, NIST acknowledges
-that "In terms of security, Frodo’s conservative design choices are
-laudable".
+explained in Section 4.3.1 of [NIST-3rd-round]. In that same report,
+NIST acknowledges that "In terms of security, Frodo’s conservative
+design choices are laudable".
 
-FrodoKEM's conservative pedigree has gained the support of multiple
-government agencies, which have expressed a desire for a conservative
+FrodoKEM's conservative design has gained the support of multiple
+government agencies, which have emphasized the need for a conservative
 option with less underlying algebraic structure. FrodoKEM has been
 recommended as a conservative alternative by the German BSI [BSI],
-the French ANSSI [ANSII], and the Dutch NLNCSA and AIVD [].
-This support motivated the standardization of FrodoKEM by ISO
-[ISO18033-2-AMD2]. The standard document, which is expected to be
-published soon, would be the first ISO standard for post-quantum
-cryptographic schemes (the standard will include ML-KEM, FrodoKEM
-and Classic McEliece). 
+the French ANSSI [ANSII], and the Dutch NLNCSA and AIVD [NLNCSA, AIVD].
+This support ultimately led to the standardization of FrodoKEM by ISO
+[ISO18033-2-AMD2]. 
 
 ## Protocol-Relevant Considerations
 
