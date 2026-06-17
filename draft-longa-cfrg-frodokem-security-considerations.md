@@ -493,15 +493,45 @@ recommended to generate a fresh keypair per session and immediately
 delete the private key after decapsulation, which provides perfect
 forward secrecy.
 
+Compared to classical schemes, lattice-based constructions such as
+FrodoKEM are still relatively young. It is therefore recommended to
+use FrodoKEM in combination with a classical scheme (e.g., based on
+elliptic curves) while further confidence in the security of
+lattice-based schemes is established over time.
+
 ## Implementation security
 
-> Patrick: say something about simplicity and ease of implementation,
-> and side-channel security. 
-> Emphasize need for constant-time implementation for sampling from
-> the error distribution, for the decapsulation check, etc.
->
-> 
+FrodoKEM is simple to implement and facilitates writing implementations
+that are compact and run in constant-time. At its core, FrodoKEM
+consists of simple matrix-vector operations that are easy to scale to
+different matrix dimensions. Also, FrodoKEM uses a modulus q that is
+either 2^15 or 2^16. These design choices enable full reuse of the
+same matrix functions across parameter sets, with only parameter
+instantiation required at build time.
 
+The use of a power-of-two modulus further simplifies implementation.
+Arithmetic modulo q is efficient and easy to do in constant-time on
+modern architectures; for example, reduction modulo 2^16 is
+automatically achieved when using 16-bit data types. Moreover, the
+chosen matrix dimensions are divisible by 16, facilitating vectorized
+implementations and simplifying the use of AES128 for generation of
+the matrix A.
+
+Error sampling is likewise designed for simplicity and code reuse.
+Across all security levels, each sample requires 16 bits, and the
+corresponding discrete cumulative distribution function (CDF) tables
+contain values strictly below 2^15. This allows for a uniform
+inversion-sampling routine instantiated with precomputed tables.
+Because these tables are small, constant-time lookup required to
+mitigate timing side-channel attacks can be implemented with
+negligible complexity and performance overhead.
+
+Special care should be given to the ciphertext verification step
+during decapsulation, ensuring that the implementation reads both k'
+and s (the secret and the fallback random secret, resp., used
+for the shared secret computation), the required comparisons are done
+in a constant-time way that avoids early termination, and sets the
+final value for kHat using data-independent evaluation.
 
 ## Public implementations
 
