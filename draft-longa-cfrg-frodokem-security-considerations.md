@@ -184,6 +184,21 @@ informative:
     - name: National Institute of Standards and Technology (NIST)
     date: 2022-07
     target: https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8413-upd1.pdf
+  FrodoCode:
+    title: Reference C and Python implementations of FrodoKEM and eFrodoKEM
+    author:
+    - name: E. Alkim
+    - name: J. W. Bos
+    - name: L. Ducas
+    - name: P. Longa
+    - name: I. Mironov
+    - name: M. Naehrig
+    - name: V. Nikolaenko
+    - name: C. Peikert
+    - name: A. Raghunathan
+    - name: D. Stebila
+    date: 2017-2026
+    target: https://github.com/microsoft/PQCrypto-LWEKE
 
 ---
 
@@ -538,12 +553,11 @@ value for kHat is set using data-independent evaluation.
 
 ## Public implementations
 
-> Patrick: mention the portable and efficient implementations in C,
-> the readable reference implementations in Python, and the functional
-> tests and known-answer tests. 
->
-> 
-
+Reference [FrodoCode] provides portable and optimized implementations
+of FrodoKEM written in C, as well as reference implementations written
+in Python that are intended to be readable and close to a line-by-line
+mapping of the FrodoKEM algorithms. These implementations include
+functional tests and known answer tests.
 
 # IANA Considerations
 
