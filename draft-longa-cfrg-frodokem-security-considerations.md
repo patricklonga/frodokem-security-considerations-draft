@@ -483,7 +483,7 @@ must follow those rules exactly.
 
 Implementations must validate the exact lengths of public keys, secret
 keys and ciphertexts for the selected parameter set before any further
-processing. The FrodoKEM Internet-Draft present fixed formats and do
+processing. The FrodoKEM Internet-Draft presents fixed formats and does
 not describe flexible wire encodings for these values.
 
 It is safe to reuse (standard) FrodoKEM public keys for multiple
@@ -533,8 +533,8 @@ Special care should be given to the ciphertext consistency check
 during decapsulation, ensuring that the implementation reads both k'
 and s (the secret and the fallback random secret, resp., used
 for the shared secret computation), the required comparisons are done
-in a constant-time way that avoids early termination, and sets the
-final value for kHat using data-independent evaluation.
+in a constant-time way that avoids early termination, and the final
+value for kHat is set using data-independent evaluation.
 
 ## Public implementations
 
