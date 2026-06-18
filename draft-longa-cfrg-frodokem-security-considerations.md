@@ -307,9 +307,9 @@ that it was not maliciously generated. If a ciphertext is detected to be invalid
 the shared secret is produced with an unrelated random value (the fallback seed
 s) that does not disclose any information. This step must not be skipped as an
 attacker can carry out a chosen-ciphertext attack to reveal the private key.
-Likewise, the ciphertext consistency check must be carried out in constant-time,
-as described in {{#ImplementationSecurity}}, to avoid key-recovery attacks that
-exploit timing side-channel leakage. Intermediate data other than data
+Likewise, the ciphertext consistency check must be carried out in constant time,
+as described in {{#ImplementationSecurity}}, to prevent key-recovery attacks
+exploiting timing side-channel leakage. Intermediate data other than data
 corresponding to the ciphertext sent by Bob or to matrix A must be securely
 deleted.
 
@@ -505,7 +505,7 @@ lattice-based schemes is established over time.
 ## Implementation security {#ImplementationSecurity}
 
 FrodoKEM is simple to implement and facilitates writing implementations
-that are compact and run in constant-time. At its core, FrodoKEM
+that are compact and run in constant time. At its core, FrodoKEM
 consists of simple matrix-vector operations that are easy to scale to
 different matrix dimensions. Also, FrodoKEM uses a modulus q that is
 either 2^15 or 2^16. These design choices enable full reuse of the
@@ -513,7 +513,7 @@ same matrix functions across parameter sets, with only parameter
 instantiation required at build time.
 
 The use of a power-of-two modulus further simplifies implementation.
-Arithmetic modulo q is efficient and easy to do in constant-time on
+Arithmetic modulo q is efficient and easy to do in constant time on
 modern architectures; for example, reduction modulo 2^16 is
 automatically achieved when using 16-bit data types. Moreover, the
 chosen matrix dimensions are divisible by 16, facilitating vectorized
