@@ -315,8 +315,9 @@ is described in Section 7.1 of [I-D.FrodoKEM].
 The algorithm internally calls the random number generator (RNG) to produce seeds
 s, seedSE and z (s is used as a fallback random secret, seedSE is used to sample
 error/secret matrices and z is used to generate the so-called public matrix A).
-These seeds can be securely stored to allow the reconstruction of the fully
-expanded key format.
+The seeds (s, seedSE, z) can be securely stored to enable later reconstruction of
+the fully expanded private key. These seeds must be protected as private key
+material.
 
 Intermediate data other than the matrix A should be securely deleted when no
 longer needed. When there is enough storage capacity, matrix A may be saved for
@@ -595,9 +596,9 @@ In some scenarios, such as embedded applications, implementors may
 need to consider additional countermeasures (e.g., masking) to protect
 against more powerful side-channel attacks beyond timing attacks. While
 resistance to certain classes of side-channel attacks remains an active
-area of research, the simplicity of FrodoKEM’s design appears to
-significantly reduce the attack surface compared to other LWE-based
-schemes that rely on FFT-based multiplication techniques.
+area of research, the simplicity of FrodoKEM’s design significantly
+reduces the attack surface compared to other LWE-based schemes that
+rely on FFT-based multiplication techniques.
 
 ## Public implementations
 
