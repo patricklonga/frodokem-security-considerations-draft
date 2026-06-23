@@ -5,7 +5,7 @@ category: info
 
 docname: draft-longa-cfrg-frodokem-security-considerations-00
 submissiontype: IRTF
-date: 2026-05-30
+date: 2026-06-22
 v: 3
 ipr: trust200902
 workgroup: CFRG
@@ -15,7 +15,7 @@ keyword:
  - PQC
 venue:
   group: Working Group
-  repo:
+  repo: github.com/patricklonga/frodokem-security-considerations-draft
 
 author:
  -
@@ -199,7 +199,22 @@ informative:
     - name: D. Stebila
     date: 2017-2026
     target: https://github.com/microsoft/PQCrypto-LWEKE
-
+  Botan:
+    title: Botan: Cryptography Toolkit
+    date: 2001-2026
+    target: https://botan.randombit.net/
+  NIST-SP800-227:
+    title: Recommendations for Key-Encapsulation Mechanisms (NIST Special Publication 800, NIST SP 800-227)
+    author:
+    - name: G. Alagic
+    - name: E. Barker
+    - name: L. Chen
+    - name: D. Moody
+    - name: A. Robinson
+    - name: H. Silberg
+    - name: N. Waller
+    date: 2025-09
+    target: https://doi.org/10.6028/NIST.SP.800-227
 ---
 
 --- abstract
@@ -243,14 +258,24 @@ produce a shared secret. The shared secret is indistinguishable from random
 by an adversary and can be used directly to establish a secure communication
 channel using a symmetric-key algorithm.
 
-A KEM protocol like FrodoKEM is not necessarily a drop-in replacement for
-Diffie-Hellman key exchange. The same specific scenarios for which ML-KEM
-works (or does not work) as Diffie-Hellman that are described in the
-Introduction of [MLKEM-SC] also apply to FrodoKEM.
-> Patrick: to check against definitions of standard and ephemeral FrodoKEM.  
+A KEM protocol like FrodoKEM is not always a drop-in replacement for
+Diffie–Hellman. Unlike Diffie–Hellman, where both parties exchange public
+keys and jointly derive a shared secret (often computing intermediate values
+independently and in parallel), a KEM requires a recipient’s public key
+before encapsulation and produces ciphertexts bound to that specific key.
+Consequently, KEMs are less flexible in asynchronous or precomputation
+settings.
 
-> Patrick: should we say anything about encryption (HPKE)?
-
+Nevertheless, KEMs can serve as drop-in replacements in several common
+protocol patterns, as explained in the introduction of [MLKEM-SC]. In
+ephemeral–ephemeral key exchange (e.g., TLS 1.3, SSH and WireGuard), or
+in static–ephemeral settings where one party has a long-term public key
+(e.g., ECIES and HPKE), a KEM can replace Diffie–Hellman. In contrast, KEMs
+do not directly support constructions that rely on joint, bidirectional
+derivation of shared secrets. This includes Diffie–Hellman ratchets (e.g.,
+Signal), implicit ephemeral–static authentication patterns (e.g., Noise and
+WireGuard), and static–static key establishment, where both parties hold
+long-term public keys.
 
 ## Standard and Ephemeral FrodoKEM
 
@@ -289,24 +314,30 @@ is described in Section 7.1 of [I-D.FrodoKEM].
 The algorithm internally calls the random number generator (RNG) to produce seeds
 s, seedSE and z (s is used as a fallback random secret, seedSE is used to sample
 error/secret matrices and z is used to generate the so-called public matrix A).
-These seeds can be securely stored to allow the reconstruction of the fully
-expanded key format. Intermediate data other than the matrix A must be securely
-deleted. When there is enough storage capacity, matrix A may be saved for repeated
-decapsulation operations with the same private key.
+The seeds (s, seedSE, z) can be securely stored to enable later reconstruction of
+the fully expanded private key. These seeds must be protected as private key
+material.
+
+Intermediate data other than the matrix A should be securely deleted when no
+longer needed. When there is enough storage capacity, matrix A may be saved for
+repeated decapsulation operations with the same private key.
 
 ## Encapsulation
 
 In the second step, Bob generates a ciphertext and a shared secret. The procedure
 is described in Section 7.2 of [I-D.FrodoKEM].
 
-The algorithm internally calls the RNG to produce a random message value u and a
-random public salt, which are then used to generate a ciphertext and a shared
-secret. Since the salt value is released as part of the ciphertext, implementors
-may want to take some precautions to avoid releasing the RNG output directly.
+The algorithm internally requires fresh randomness to generate the message value u 
+and the public salt. The value u is secret encapsulation randomness. 
+The salt is released as part of the ciphertext and is intended to be public, but it 
+must be freshly generated with sufficient entropy and must be independent of u.
+Implementations must use a cryptographically secure RNG or DRBG whose public outputs
+do not compromise past or future secret outputs.
+
 Intermediate data other than data corresponding to the ciphertext or public key
-(including matrix A) must be securely deleted. When there is enough storage
-capacity, matrix A may be saved for repeated encapsulation operations with the
-same public key.
+(including matrix A) should be securely deleted when no longer needed. When there
+is enough storage capacity, matrix A may be saved for repeated encapsulation
+operations with the same public key.
 
 The ciphertext can be sent back to Alice; if the protocol is successful, the
 shared secret will be the key shared with Alice.
@@ -317,16 +348,19 @@ In the third and final step, Alice generates the shared secret using her private
 key and the ciphertext sent by Bob. The procedure is described in Section 7.3 of
 [I-D.FrodoKEM].
 
-The algorithm internally regenerates the computation of the ciphertext to ensure
-that it was not maliciously generated. If a ciphertext is detected to be invalid,
-the shared secret is produced with an unrelated random value (the fallback seed
-s) that does not disclose any information. This step must not be skipped as an
-attacker can carry out a chosen-ciphertext attack to reveal the private key.
-Likewise, the ciphertext consistency check must be carried out in constant time,
-as described in {{#ImplementationSecurity}}, to prevent key-recovery attacks
-exploiting timing side-channel leakage. Intermediate data other than data
-corresponding to the ciphertext sent by Bob or to matrix A must be securely
-deleted.
+The algorithm reconstructs the ciphertext that would result from the decoded  
+message and compares it with the received ciphertext. If the comparison fails, 
+decapsulation uses the fallback secret s to derive the shared secret. This
+implicit-rejection step is essential for CCA security and must not be skipped,
+exposed as a distinguishable error, or implemented with timing, memory-access,
+logging, or control-flow behavior that reveals whether the received ciphertext
+was valid. The comparison of the reconstructed and received ciphertext
+components and the selection between k' and s must be performed in constant time
+with respect to the secret key, the decoded candidate message, and the comparison
+result.
+
+Intermediate data other than data corresponding to the ciphertext sent by Bob or
+to matrix A should be securely deleted when no longer needed.
 
 If the protocol is successful, the shared secret generated by Alice and Bob will
 be the same.
@@ -387,10 +421,11 @@ For most applications, the default choice should be one of the standard
 can guarantee that fewer than 2^8 ciphertexts are ever produced under a
 public key.
 
-It is recommended that users use the highest possible security level that
-a given application allows. For most applications, it is recommended to
-use either FrodoKEM-976 or FrodoKEM-1344. FrodoKEM-640 may be used in
-applications that require short-term security.
+It is recommended to use the highest security level supported by a given
+application. For most applications, it is recommended to use either
+FrodoKEM-976 or FrodoKEM-1344. FrodoKEM‑640 may be used in applications
+that cannot accommodate the performance or bandwidth requirements of the
+higher parameter sets and do not require long-term confidentiality.
 
 A short decision guide is therefore:
 
@@ -407,9 +442,12 @@ A short decision guide is therefore:
 
 For protocol designers and implementors, the authoritative FrodoKEM
 specification is detailed in the FrodoKEM Internet-Draft [I-D.FrodoKEM].
-As of version draft-longa-cfrg-frodokem-02, the I-D is fully compatible
-with the ISO standard [ISO18033-2-AMD2], with the sole exception that
-the FrodoKEM-640 parameter set is **not** included in [ISO18033-2-AMD2]. 
+As of version draft-longa-cfrg-frodokem-03, the FrodoKEM I-D is fully
+aligned with the ISO standard [ISO18033-2-AMD2], with the sole exception
+that the FrodoKEM-640 parameter set is **not** included in
+[ISO18033-2-AMD2]. In addition, the FrodoKEM I-D specifies a seed-based
+private key format as an optional serialization method (Section 7.1 of
+[I-D.FrodoKEM]), whereas [ISO18033-2-AMD2] does not describe this option.
 
 Both documents are in turn derived from FrodoKEM's Round 3 specification
 [FrodoSpec2021] and the 2023 annex that provides the algorithm specification
@@ -422,10 +460,10 @@ security. In practice, this means that users can freely reuse public/private
 keypairs for multiple encapsulation/decapsulation operations (this applies
 specifically to the case of standard FrodoKEM).
 
-A relevant related notion is multi-target security. Here, the adversary is
-given potentially several ciphertexts each generated under a public key
-of the adversary's choice. The 2025 FrodoKEM paper [FrodoPaper2025] proves
-that FrodoKEM tightly achieves multi-target security by means of the salted
+A related notion is multi-target security, in which the adversary is
+given multiple ciphertexts, each generated under a public key of its
+choice. The 2025 FrodoKEM paper [FrodoPaper2025] proves that FrodoKEM
+tightly achieves multi-target security by means of the salted
 Fujisaki-Okamoto (SFO) transform in conjunction with the hashing of the
 public key in the computation of random strings during encapsulation.
 
@@ -472,29 +510,31 @@ This support ultimately led to the standardization of FrodoKEM by ISO
 
 ## Protocol-Relevant Considerations
 
-As a KEM, FrodoKEM does not provide authentication for the
-communicating parties. Hence, it is important that the protocol using
-FrodoKEM allows Bob to validate Alice's public key and allows Alice to
-validate Bob's ciphertext. This validation can be performed using some
-cryptographic method such as a digital signature or a MAC.
+As a KEM, FrodoKEM does not provide authentication of the communicating
+parties. Therefore, the surrounding protocol must ensure authentication
+of public keys and must bind protocol messages to the identities of the
+participating parties. This is typically achieved using digital
+signatures or authenticated key exchange constructions.
 
-FrodoKEM's specification does not contain any separate algebraic
-public-key validation procedure beyond exact parsing and execution of
-the specified algorithms. Protocols therefore should treat public keys
-as fixed-format opaque byte strings and rely on the surrounding protocol
-for origin authentication.
+Similar to ML-KEM, FrodoKEM employs implicit rejection: when
+decapsulation is performed on an invalid ciphertext, it returns a
+pseudorandom shared secret rather than signaling an error. As a result,
+the communicating parties may derive different shared secrets. In
+well-designed authenticated key exchange protocols, where the derived
+shared secret is used to produce symmetric cryptographic keys, such a
+mismatch causes subsequent protocol steps (e.g., key confirmation or
+integrity checks) to fail without compromising security.
 
-Implementations must perform the full decapsulation verification logic
-as specified: decode the received ciphertext components, derive the
-candidate message, reconstruct the expected ciphertext under the
-regenerated coins, compare the reconstructed values to the received
-ones, and apply the fallback secret if the check fails. This logic
-is central to FrodoKEM’s CCA-style security.
-
-The byte encoding rules, the separate packing/unpacking byte encoding,
-and the matrix encoding and decoding rules are explicitly specified in
-the current FrodoKEM Internet-Draft [I-D.FrodoKEM]. Implementations
-must follow those rules exactly.
+Likewise, FrodoKEM has a (negligible) probability that decapsulation
+of a valid ciphertext does not recover the same shared secret produced
+during encapsulation. This failure probability is extremely small for
+the standardized parameter sets and is accounted for in the security
+analysis. In practice, such an event results in a mismatch between
+the parties’ derived shared secrets. As discussed above, in
+well-designed protocols that derive symmetric keys from the shared
+secret, this mismatch causes subsequent integrity checks or key
+confirmation steps to fail, leading to a safe termination of the
+protocol without compromising security.
 
 Implementations must validate the exact lengths of public keys, secret
 keys and ciphertexts for the selected parameter set before any further
@@ -508,14 +548,15 @@ secrecy: if the private key is later compromised, past sessions can
 be recovered. Therefore, when a protocol already transmits an
 unauthenticated public key (e.g., as part of a handshake), it is
 recommended to generate a fresh keypair per session and immediately
-delete the private key after decapsulation, which provides perfect
-forward secrecy.
+delete the private key after decapsulation to obtain perfect forward
+secrecy.
 
-Compared to classical schemes, lattice-based constructions such as
-FrodoKEM are still relatively young. It is therefore recommended to
-use FrodoKEM in combination with a classical scheme (e.g., based on
-elliptic curves) while further confidence in the security of
-lattice-based schemes is established over time.
+Because lattice-based KEMs are relatively new compared to the classical
+mechanisms they are intended to replace, deployments are encouraged to
+use FrodoKEM in a hybrid construction with a traditional key-establishment
+mechanism. Such use should follow a specified hybrid KEM or protocol
+construction employing a security-analyzed combiner; e.g., see Section 4.6
+of [NIST-SP800-227].
 
 ## Implementation security {#ImplementationSecurity}
 
@@ -544,12 +585,25 @@ Because these tables are small, constant-time lookup required to
 mitigate timing side-channel attacks can be implemented with
 negligible complexity and performance overhead.
 
+The byte encoding rules, the separate packing/unpacking byte encoding,
+and the matrix encoding and decoding rules are explicitly specified in
+the current FrodoKEM Internet-Draft [I-D.FrodoKEM]. Implementations
+must follow those rules exactly.
+
 Special care should be given to the ciphertext consistency check
 during decapsulation, ensuring that the implementation reads both k'
 and s (the secret and the fallback random secret, resp., used
 for the shared secret computation), the required comparisons are done
 in a constant-time way that avoids early termination, and the final
 value for kHat is set using data-independent evaluation.
+
+In some scenarios, such as embedded applications, implementors may
+need to consider additional countermeasures (e.g., masking) to protect
+against more powerful side-channel attacks beyond timing attacks. While
+resistance to certain classes of side-channel attacks remains an active
+area of research, the simplicity of FrodoKEM’s design significantly
+reduces the attack surface compared to other LWE-based schemes that
+rely on FFT-based multiplication techniques.
 
 ## Public implementations
 
@@ -558,6 +612,9 @@ of FrodoKEM written in C, as well as reference implementations written
 in Python that are intended to be readable and close to a line-by-line
 mapping of the FrodoKEM algorithms. These implementations include
 functional tests and known answer tests.
+
+The Botan cryptography library also contains a C++ implementation of
+FrodoKEM [Botan].
 
 # IANA Considerations
 
