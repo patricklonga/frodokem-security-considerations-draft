@@ -37,7 +37,7 @@ author:
 
 normative:
   I-D.FrodoKEM:
-    title: FrodoKEM: key encapsulation from learning with errors (IETF Internet-Draft, draft-longa-cfrg-frodokem)
+    title: "FrodoKEM: key encapsulation from learning with errors (IETF Internet-Draft, draft-longa-cfrg-frodokem)"
     author:
     - name: P. Longa
     - name: J. W. Bos
@@ -46,7 +46,7 @@ normative:
     date: 2026-03
     target: https://datatracker.ietf.org/doc/draft-longa-cfrg-frodokem/
   ISO18033-2-AMD2:
-    title: ISO/IEC 18033-2:2006/Amd 2, Information technology — Security techniques — Encryption algorithms — Part 2: Asymmetric ciphers, Amendment 2
+    title: "ISO/IEC 18033-2:2006/Amd 2, Information technology — Security techniques — Encryption algorithms — Part 2: Asymmetric ciphers, Amendment 2"
     author:
     - name: ISO
     date: 2026-06
@@ -54,7 +54,7 @@ normative:
 
 informative:
   FrodoSpec2021:
-    title: FrodoKEM: Learning With Errors Key Encapsulation, Algorithm Specifications And Supporting Documentation (FrodoKEM Round 3 specification)
+    title: "FrodoKEM: Learning With Errors Key Encapsulation, Algorithm Specifications And Supporting Documentation (FrodoKEM Round 3 specification)"
     author:
     - name: E. Alkim
     - name: J. W. Bos
@@ -84,7 +84,7 @@ informative:
     date: 2023-04
     target: https://frodokem.org/files/FrodoKEM-annex-20230418.pdf
   FrodoPaper2025:
-    title: FrodoKEM: A CCA-Secure Learning With Errors Key Encapsulation Mechanism
+    title: "FrodoKEM: A CCA-Secure Learning With Errors Key Encapsulation Mechanism"
     author:
     - name: L. Glabush
     - name: P. Longa
@@ -138,7 +138,7 @@ informative:
     date: 2020
     target: https://eprint.iacr.org/2019/1161
   DDG+20:
-    title: LWE with side information: Attacks and concrete security estimation
+    title: "LWE with side information: Attacks and concrete security estimation"
     author:
     - name: D. Dachman-Soled
     - name: L. Ducas 
@@ -161,7 +161,7 @@ informative:
     date: 2025
     target: https://eprint.iacr.org/2025/343
   BSI24:
-    title: Cryptographic Mechanisms: Recommendations and Key Lengths, BSI TR-02102-1, Version: 2024-1
+    title: "Cryptographic Mechanisms: Recommendations and Key Lengths, BSI TR-02102-1, Version: 2024-1"
     author:
     - name: Federal Office for Information Security (BSI)
     date: 2024-01
@@ -173,7 +173,7 @@ informative:
     date: 2023
     target: https://cyber.gouv.fr/en/publications/follow-position-paper-post-quantum-cryptography
   AIVD24:
-    title:  The PQC Migration Handbook: Guidelines for Migrating to Post-Quantum Cryptography (second edition)
+    title:  "The PQC Migration Handbook: Guidelines for Migrating to Post-Quantum Cryptography (second edition)"
     author:
     - name: General Intelligence and Security Service (AIVD) and Centrum Wiskunde & Informatica (CWI) and Netherlands Organization for Applied Scientific Research (TNO)
     date: 2024
@@ -200,7 +200,7 @@ informative:
     date: 2017-2026
     target: https://github.com/microsoft/PQCrypto-LWEKE
   Botan:
-    title: Botan: Cryptography Toolkit
+    title: "Botan: Cryptography Toolkit"
     date: 2001-2026
     target: https://botan.randombit.net/
   NIST-SP800-227:
@@ -215,7 +215,6 @@ informative:
     - name: N. Waller
     date: 2025-09
     target: https://doi.org/10.6028/NIST.SP.800-227
----
 
 --- abstract
   ISO standardized FrodoKEM in June 2026 [ISO18033-2-AMD2]. This document provides
@@ -348,7 +347,7 @@ In the third and final step, Alice generates the shared secret using her private
 key and the ciphertext sent by Bob. The procedure is described in Section 7.3 of
 [I-D.FrodoKEM].
 
-The algorithm reconstructs the ciphertext that would result from the decoded  
+The algorithm reconstructs the ciphertext that would result from the decoded
 message and compares it with the received ciphertext. If the comparison fails, 
 decapsulation uses the fallback secret s to derive the shared secret. This
 implicit-rejection step is essential for CCA security and must not be skipped,
@@ -490,7 +489,7 @@ papers include [ACD+18], [ADH+19], [AGP+20], [DDG+20], to name a few.
 
 FrodoKEM has a substantial public record that dates back to the start
 of NIST's Post-Quantum Cryptography Standardization process in 2017.
-In addition to the security analysis presented as part of the the NIST
+In addition to the security analysis presented as part of the NIST
 submission, FrodoKEM's security has been studied in [Gla24], [GHS25]
 and [FrodoPaper2025]. 
 
@@ -581,7 +580,7 @@ Across all security levels, each sample requires 16 bits, and the
 corresponding discrete cumulative distribution function (CDF) tables
 contain values strictly below 2^15. This allows for a uniform
 inversion-sampling routine instantiated with precomputed tables.
-Because these tables are small, constant-time lookup required to
+Because these tables are small, constant-time lookup used to
 mitigate timing side-channel attacks can be implemented with
 negligible complexity and performance overhead.
 
