@@ -5,7 +5,7 @@ category: info
 
 docname: draft-longa-cfrg-frodokem-security-considerations-00
 submissiontype: IRTF
-date: 2026-05-30
+date: 2026-06-22
 v: 3
 ipr: trust200902
 workgroup: CFRG
@@ -15,7 +15,7 @@ keyword:
  - PQC
 venue:
   group: Working Group
-  repo:
+  repo: github.com/patricklonga/frodokem-security-considerations-draft
 
 author:
  -
@@ -276,7 +276,6 @@ derivation of shared secrets. This includes Diffie–Hellman ratchets (e.g.,
 Signal), implicit ephemeral–static authentication patterns (e.g., Noise and
 WireGuard), and static–static key establishment, where both parties hold
 long-term public keys.
-> Patrick: needs review
 
 ## Standard and Ephemeral FrodoKEM
 
@@ -332,7 +331,6 @@ The algorithm internally requires fresh randomness to generate the message value
 and the public salt. The value u is secret encapsulation randomness. 
 The salt is released as part of the ciphertext and is intended to be public, but it 
 must be freshly generated with sufficient entropy and must be independent of u.
-> Patrick: removing "except as specified by the algorithm." Is this part necessary?
 Implementations must use a cryptographically secure RNG or DRBG whose public outputs
 do not compromise past or future secret outputs.
 
@@ -340,7 +338,6 @@ Intermediate data other than data corresponding to the ciphertext or public key
 (including matrix A) should be securely deleted when no longer needed. When there
 is enough storage capacity, matrix A may be saved for repeated encapsulation
 operations with the same public key.
-> Patrick: adjusted to keep consistency with the other sections.
 
 The ciphertext can be sent back to Alice; if the protocol is successful, the
 shared secret will be the key shared with Alice.
@@ -445,9 +442,12 @@ A short decision guide is therefore:
 
 For protocol designers and implementors, the authoritative FrodoKEM
 specification is detailed in the FrodoKEM Internet-Draft [I-D.FrodoKEM].
-As of version draft-longa-cfrg-frodokem-02, the I-D is fully compatible
-with the ISO standard [ISO18033-2-AMD2], with the sole exception that
-the FrodoKEM-640 parameter set is **not** included in [ISO18033-2-AMD2]. 
+As of version draft-longa-cfrg-frodokem-03, the FrodoKEM I-D is fully
+aligned with the ISO standard [ISO18033-2-AMD2], with the sole exception
+that the FrodoKEM-640 parameter set is **not** included in
+[ISO18033-2-AMD2]. In addition, the FrodoKEM I-D specifies a seed-based
+private key format as an optional serialization method (Section 7.1 of
+[I-D.FrodoKEM]), whereas [ISO18033-2-AMD2] does not describe this option.
 
 Both documents are in turn derived from FrodoKEM's Round 3 specification
 [FrodoSpec2021] and the 2023 annex that provides the algorithm specification
@@ -510,31 +510,31 @@ This support ultimately led to the standardization of FrodoKEM by ISO
 
 ## Protocol-Relevant Considerations
 
-As a KEM, FrodoKEM does not provide authentication of the
-communicating parties. Therefore, the surrounding protocol must ensure
-that Bob can authenticate Alice’s public key and that Alice can
-authenticate Bob’s ciphertext. This can be achieved using standard
-cryptographic mechanisms such as a digital signature or a MAC.
-> Stephan: I think this paragraph can be confusing. 
-> Patrick: clear enough now?
+As a KEM, FrodoKEM does not provide authentication of the communicating
+parties. Therefore, the surrounding protocol must ensure authentication
+of public keys and must bind protocol messages to the identities of the
+participating parties. This is typically achieved using digital
+signatures or authenticated key exchange constructions.
 
-> We might want to mention something like
-> "Protocol-level authentication, if needed, must bind the public key, 
-> ciphertext, algorithm identifiers, and transcript."
-> Patrick: I removed the paragraph because it was confusing. Any suggestions
-> for the text you are proposing?
+Similar to ML-KEM, FrodoKEM employs implicit rejection: when
+decapsulation is performed on an invalid ciphertext, it returns a
+pseudorandom shared secret rather than signaling an error. As a result,
+the communicating parties may derive different shared secrets. In
+well-designed authenticated key exchange protocols, where the derived
+shared secret is used to produce symmetric cryptographic keys, such a
+mismatch causes subsequent protocol steps (e.g., key confirmation or
+integrity checks) to fail without compromising security.
 
-> Stephan: It would make sense, however, to write something about protocol-level
-> considerations when the two parties obtain a different shared secret due to
-> implicit rejection.
-> Patrick: I removed the paragraph because it's explained somewhere else.
-> Any suggestions for the text you are proposing?
-
-The byte encoding rules, the separate packing/unpacking byte encoding,
-and the matrix encoding and decoding rules are explicitly specified in
-the current FrodoKEM Internet-Draft [I-D.FrodoKEM]. Implementations
-must follow those rules exactly.
-> Patrick: maybe we should move this to the implementation security section?
+Likewise, FrodoKEM has a (negligible) probability that decapsulation
+of a valid ciphertext does not recover the same shared secret produced
+during encapsulation. This failure probability is extremely small for
+the standardized parameter sets and is accounted for in the security
+analysis. In practice, such an event results in a mismatch between
+the parties’ derived shared secrets. As discussed above, in
+well-designed protocols that derive symmetric keys from the shared
+secret, this mismatch causes subsequent integrity checks or key
+confirmation steps to fail, leading to a safe termination of the
+protocol without compromising security.
 
 Implementations must validate the exact lengths of public keys, secret
 keys and ciphertexts for the selected parameter set before any further
@@ -584,6 +584,11 @@ inversion-sampling routine instantiated with precomputed tables.
 Because these tables are small, constant-time lookup required to
 mitigate timing side-channel attacks can be implemented with
 negligible complexity and performance overhead.
+
+The byte encoding rules, the separate packing/unpacking byte encoding,
+and the matrix encoding and decoding rules are explicitly specified in
+the current FrodoKEM Internet-Draft [I-D.FrodoKEM]. Implementations
+must follow those rules exactly.
 
 Special care should be given to the ciphertext consistency check
 during decapsulation, ensuring that the implementation reads both k'
