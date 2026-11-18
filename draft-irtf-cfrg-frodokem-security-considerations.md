@@ -5,7 +5,7 @@ category: info
 
 docname: draft-irtf-cfrg-frodokem-security-considerations-00
 submissiontype: IRTF
-date: 2026-11-09
+date: 2026-11-18
 v: 3
 ipr: trust200902
 workgroup: CFRG
